@@ -76,6 +76,8 @@ const AdminProducts = () => {
     salePrice: '',
     description: '',
     featuredImage: '',
+    images: [],
+    imagesUrlInput: '',
     height: '',
     width: '',
     depth: '',
@@ -114,15 +116,111 @@ const AdminProducts = () => {
     setCustomColorInput('');
   };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  const compressImage = (file, maxWidth = 1200, quality = 0.82) => {
+    return new Promise((resolve) => {
+      if (!file || !file.type.startsWith('image/')) {
+        resolve('');
+        return;
+      }
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, featuredImage: reader.result }));
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
+        };
+        img.onerror = () => resolve(e.target.result);
+        img.src = e.target.result;
       };
+      reader.onerror = () => resolve('');
       reader.readAsDataURL(file);
+    });
+  };
+
+  // Multiple Image Files Upload Handler (Option A)
+  const handleMultipleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      const compressedResults = await Promise.all(
+        files.map((file) => compressImage(file))
+      );
+      const validObjs = compressedResults.filter(Boolean).map((url) => ({ url }));
+
+      if (validObjs.length > 0) {
+        setFormData((prev) => {
+          const existing = prev.images || [];
+          const combined = [...existing, ...validObjs];
+          return {
+            ...prev,
+            images: combined,
+            featuredImage: combined[0]?.url || prev.featuredImage,
+          };
+        });
+      }
     }
+  };
+
+  // Comma-separated or single URL paste handler (Option B)
+  const handleAddUrlsFromInput = (rawString) => {
+    if (!rawString.trim()) return;
+    const splitUrls = rawString
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    if (splitUrls.length > 0) {
+      const newObjs = splitUrls.map((u) => ({ url: u }));
+      setFormData((prev) => {
+        const existing = prev.images || [];
+        const combined = [...existing, ...newObjs];
+        return {
+          ...prev,
+          images: combined,
+          featuredImage: combined[0]?.url || prev.featuredImage,
+          imagesUrlInput: '',
+        };
+      });
+    }
+  };
+
+  const setAsMainImage = (indexToMain) => {
+    setFormData((prev) => {
+      const existing = [...(prev.images || [])];
+      if (indexToMain >= 0 && indexToMain < existing.length) {
+        const [target] = existing.splice(indexToMain, 1);
+        existing.unshift(target);
+      }
+      return {
+        ...prev,
+        images: existing,
+        featuredImage: existing[0]?.url || prev.featuredImage,
+      };
+    });
+  };
+
+  const removeImageAtIndex = (indexToRemove) => {
+    setFormData((prev) => {
+      const existing = (prev.images || []).filter((_, i) => i !== indexToRemove);
+      return {
+        ...prev,
+        images: existing,
+        featuredImage: existing[0]?.url || '',
+      };
+    });
   };
 
   const loadData = async () => {
@@ -154,6 +252,8 @@ const AdminProducts = () => {
       salePrice: '0',
       description: 'Solid teak wood furniture crafted for luxury living.',
       featuredImage: '/images/image.png',
+      images: [{ url: '/images/image.png' }],
+      imagesUrlInput: '',
       height: '110 cm',
       width: '180 cm',
       depth: '210 cm',
@@ -170,13 +270,19 @@ const AdminProducts = () => {
 
   const openEditModal = (product) => {
     setEditingProduct(product);
+    const existingImages = Array.isArray(product.images) && product.images.length > 0
+      ? product.images
+      : (product.featuredImage ? [{ url: product.featuredImage }] : []);
+
     setFormData({
       name: product.name,
       category: product.category?._id || product.category || categories[0]?._id || '',
       price: product.price,
       salePrice: product.salePrice || 0,
       description: product.description || '',
-      featuredImage: product.featuredImage || '',
+      featuredImage: product.featuredImage || existingImages[0]?.url || '',
+      images: existingImages,
+      imagesUrlInput: '',
       height: product.height || '',
       width: product.width || '',
       depth: product.depth || '',
@@ -194,10 +300,15 @@ const AdminProducts = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        featuredImage: formData.images?.[0]?.url || formData.featuredImage || '',
+      };
+
       if (editingProduct) {
-        await updateProduct(editingProduct._id, formData);
+        await updateProduct(editingProduct._id, payload);
       } else {
-        await createProduct(formData);
+        await createProduct(payload);
       }
       setIsModalOpen(false);
       loadData();
@@ -582,14 +693,13 @@ const AdminProducts = () => {
                         const variantObj = (formData.colorVariants || []).find((v) => v.color === colorName) || { color: colorName, image: '' };
                         const hex = getColorHex(colorName);
 
-                        const handleVariantImgUpload = (e) => {
+                        const handleVariantImgUpload = async (e) => {
                           const file = e.target.files[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              updateColorVariantImage(colorName, reader.result);
-                            };
-                            reader.readAsDataURL(file);
+                            const compressed = await compressImage(file);
+                            if (compressed) {
+                              updateColorVariantImage(colorName, compressed);
+                            }
                           }
                         };
 
@@ -647,36 +757,102 @@ const AdminProducts = () => {
                 )}
               </div>
 
-              {/* Product Image (File Picker + URL Paste + Instant Preview) */}
-              <div className="space-y-2">
-                <label className="block font-semibold uppercase tracking-wider mb-1">Product Image</label>
+              {/* Product Images & Gallery Section (Multiple Images & Comma-Separated URL Support) */}
+              <div className="bg-[#FAF6EE] border border-[#E8DEC4] p-3.5 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="block font-bold uppercase tracking-wider text-[11px] text-[#886633]">
+                    Product Images & Gallery (Multiple Photos Support)
+                  </span>
+                  <span className="text-[10px] text-[#777]">Upload multiple photos or paste comma-separated URLs</span>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
                   <div>
-                    <label className="block text-[10px] text-[#666] mb-1 font-medium">Option A: Choose Image File from Device</label>
+                    <label className="block text-[10px] text-[#666] mb-1 font-medium">Option A: Select Multiple Files from Device</label>
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleFileUpload}
-                      className="w-full text-xs bg-white border border-[#E8DEC4] p-1.5 rounded file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-[#1A1A1A] file:text-white hover:file:bg-[#947455] cursor-pointer"
+                      multiple
+                      onChange={handleMultipleFileUpload}
+                      className="w-full text-xs bg-white border border-[#E8DEC4] p-1.5 rounded file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-[#1A1A1A] file:text-white hover:file:bg-sand-600 cursor-pointer"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-[10px] text-[#666] mb-1 font-medium">Option B: Paste Image URL</label>
-                    <input
-                      type="text"
-                      placeholder="https://..."
-                      value={formData.featuredImage}
-                      onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
-                      className="w-full bg-white border border-[#E8DEC4] px-3 py-2 rounded focus:outline-none"
-                    />
+                    <label className="block text-[10px] text-[#666] mb-1 font-medium">Option B: Paste URLs (Separate multiple with comma ,)</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="https://img1.jpg, https://img2.jpg..."
+                        value={formData.imagesUrlInput || ''}
+                        onChange={(e) => setFormData({ ...formData, imagesUrlInput: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddUrlsFromInput(formData.imagesUrlInput || '');
+                          }
+                        }}
+                        className="flex-1 bg-white border border-[#E8DEC4] px-3 py-1.5 rounded text-xs focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddUrlsFromInput(formData.imagesUrlInput || '')}
+                        className="px-3 py-1.5 bg-[#1A1A1A] text-white rounded text-xs font-semibold hover:bg-sand-600 transition-colors cursor-pointer"
+                      >
+                        + Add
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {formData.featuredImage && (
-                  <div className="flex items-center gap-3 pt-2">
-                    <span className="text-[10px] uppercase font-bold text-[#777]">Image Preview:</span>
-                    <div className="w-14 h-14 rounded-lg overflow-hidden border border-[#DCD3BE] bg-white shadow-sm">
-                      <img src={formData.featuredImage} alt="Preview" className="w-full h-full object-cover" />
+                {/* Multiple Image Preview Grid */}
+                {formData.images && formData.images.length > 0 && (
+                  <div className="pt-2 border-t border-[#E8DEC4]">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] uppercase font-bold text-[#886633]">
+                        Gallery Photos ({formData.images.length}):
+                      </span>
+                      <span className="text-[9px] text-[#777] italic">First photo is used as Main Product Image</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2.5">
+                      {formData.images.map((imgObj, idx) => {
+                        const isMain = idx === 0;
+                        return (
+                          <div key={idx} className="relative group w-20 h-20 rounded-lg overflow-hidden border border-[#DCD3BE] bg-white shadow-sm flex-shrink-0">
+                            <img src={imgObj.url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                            
+                            {/* Main Badge */}
+                            {isMain && (
+                              <span className="absolute top-1 left-1 bg-[#1A1A1A] text-white text-[8px] uppercase font-bold px-1.5 py-0.5 rounded shadow">
+                                Main
+                              </span>
+                            )}
+
+                            {/* Action Buttons Overlay */}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 p-1">
+                              {!isMain && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAsMainImage(idx)}
+                                  className="bg-white text-black text-[9px] font-bold px-1.5 py-1 rounded hover:bg-sand-200"
+                                  title="Set as Main Image"
+                                >
+                                  Main
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => removeImageAtIndex(idx)}
+                                className="bg-red-600 text-white p-1 rounded hover:bg-red-700"
+                                title="Remove Image"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
