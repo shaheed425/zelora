@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import ScrollToTop from './components/ScrollToTop';
+import WhatsAppFloat from './components/WhatsAppFloat';
 
 // Storefront Pages
 import Home from './pages/Home';
@@ -46,11 +47,27 @@ const Layout = ({ children }) => {
       <main className="flex-1">{children}</main>
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <CartDrawer />}
+      {!isAdminRoute && <WhatsAppFloat />}
     </div>
   );
 };
 
 function App() {
+  useEffect(() => {
+    // Keep-Alive Anti-Sleep Mechanism (Wakes up free backend instances instantly)
+    const pingBackend = async () => {
+      try {
+        await fetch('/api/health');
+      } catch (err) {
+        // Silently ignore ping errors
+      }
+    };
+
+    pingBackend();
+    const interval = setInterval(pingBackend, 5 * 60 * 1000); // Ping every 5 minutes
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <AuthProvider>
       <CartProvider>

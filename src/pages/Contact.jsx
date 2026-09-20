@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import { submitEnquiry } from '../services/enquiryService';
+import { WhatsAppIcon } from '../components/WhatsAppFloat';
 
 const Contact = () => {
   const [formData, setFormData] = useState({

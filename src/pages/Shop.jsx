@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Filter, SlidersHorizontal, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import { fetchProducts } from '../services/productService';
 import { fetchCategories } from '../services/categoryService';
@@ -38,26 +38,27 @@ const Shop = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        const query = {
+        const params = {
           page: currentPage,
           limit: 12,
           category: selectedCategory,
           sortBy: selectedSort,
-          minPrice: minPrice || undefined,
-          maxPrice: maxPrice || undefined,
-          search: searchQuery || undefined,
+          minPrice,
+          maxPrice,
+          search: searchQuery,
         };
-        const data = await fetchProducts(query);
-        setProducts(data.products || []);
-        setPagination(data.pagination || { page: 1, totalPages: 1, total: 0 });
+        const res = await fetchProducts(params);
+        setProducts(res.products || []);
+        setPagination(res.pagination || { page: 1, totalPages: 1, total: 0 });
       } catch (err) {
-        console.error('Failed to load shop products:', err);
+        console.error('Failed to load products:', err);
       } finally {
         setLoading(false);
       }
     };
+
     loadProducts();
-  }, [selectedCategory, selectedSort, minPrice, maxPrice, currentPage, searchQuery]);
+  }, [searchParams, currentPage, selectedCategory, selectedSort, minPrice, maxPrice, searchQuery]);
 
   const updateFilter = (key, value) => {
     const newParams = new URLSearchParams(searchParams);
@@ -66,12 +67,16 @@ const Shop = () => {
     } else {
       newParams.delete(key);
     }
-    newParams.set('page', '1'); // reset page on filter change
+    if (key !== 'page') {
+      newParams.set('page', '1');
+    }
     setSearchParams(newParams);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const clearAllFilters = () => {
     setSearchParams(new URLSearchParams());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -90,13 +95,17 @@ const Shop = () => {
       </div>
 
       {/* Top Filter & Sort Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-4 rounded-lg border border-[#F2ECE4]">
+      <div className="flex items-center justify-between gap-2 mb-8 bg-white p-3 sm:p-4 rounded-lg border border-[#F2ECE4] shadow-sm">
         <button
           onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-          className="lg:hidden flex items-center gap-2 text-xs uppercase tracking-wider font-semibold text-charcoal"
+          className="lg:hidden flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs uppercase tracking-wider font-semibold text-charcoal bg-[#FAF8F5] border border-[#D4B890] hover:bg-[#1A1A1A] hover:text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg shadow-sm transition-all duration-300 active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
         >
-          <SlidersHorizontal className="w-4 h-4 text-sand-600" />
-          <span>Filters</span>
+          <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sand-600" />
+          <span>FILTERS</span>
+          {(selectedCategory || minPrice || maxPrice || searchQuery) && (
+            <span className="w-2 h-2 rounded-full bg-sand-600 animate-pulse"></span>
+          )}
+          {mobileFilterOpen ? <ChevronUp className="w-3.5 h-3.5 ml-0.5" /> : <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
         </button>
 
         {/* Category Pills (Desktop) */}
@@ -127,12 +136,12 @@ const Shop = () => {
         </div>
 
         {/* Sort Selector */}
-        <div className="flex items-center gap-3 ml-auto">
-          <span className="text-xs text-[#76726E] uppercase tracking-wider font-medium hidden sm:inline">Sort By:</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-[#76726E] uppercase tracking-wider font-medium hidden md:inline">Sort By:</span>
           <select
             value={selectedSort}
             onChange={(e) => updateFilter('sortBy', e.target.value)}
-            className="bg-[#FAF8F5] border border-[#E8DEC4] text-xs text-charcoal px-3 py-2 rounded font-medium focus:outline-none focus:border-sand-500 cursor-pointer"
+            className="bg-[#FAF8F5] border border-[#D4B890] text-[11px] sm:text-xs text-charcoal px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-medium focus:outline-none focus:border-sand-500 cursor-pointer whitespace-nowrap"
           >
             <option value="createdAt">Newest Additions</option>
             <option value="price_asc">Price: Low to High</option>
@@ -150,7 +159,10 @@ const Shop = () => {
         <div className={`lg:block ${mobileFilterOpen ? 'block' : 'hidden'} space-y-8 bg-white p-6 rounded-lg border border-[#F2ECE4] h-fit`}>
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-[#F2ECE4] pb-2">
-              <h3 className="font-editorial text-xl font-medium text-charcoal">Categories</h3>
+              <h3 className="font-editorial text-xl font-medium text-charcoal flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-sand-600" />
+                <span>Filters</span>
+              </h3>
               {(selectedCategory || minPrice || maxPrice || searchQuery) && (
                 <button
                   onClick={clearAllFilters}
@@ -181,17 +193,14 @@ const Shop = () => {
                   }`}
                 >
                   <span>{cat.name}</span>
-                  <span>({cat.productCount || 0})</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Price Range Filter */}
-          <div>
-            <h3 className="font-editorial text-xl font-medium text-charcoal mb-4 border-b border-[#F2ECE4] pb-2">
-              Price Range (₹)
-            </h3>
+          {/* Price Filter */}
+          <div className="border-t border-[#F2ECE4] pt-6">
+            <h4 className="font-editorial text-lg font-medium text-charcoal mb-4">Price Range (₹)</h4>
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="number"
@@ -215,7 +224,7 @@ const Shop = () => {
         {/* Products Grid */}
         <div className="lg:col-span-3">
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="aspect-portrait bg-sand-100 rounded-lg animate-pulse" />
               ))}
@@ -233,7 +242,7 @@ const Shop = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard key={product._id} product={product} />
                 ))}
@@ -241,24 +250,28 @@ const Shop = () => {
 
               {/* Pagination Controls */}
               {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 mt-12 pt-8 border-t border-[#E8DEC4]">
+                <div className="flex items-center justify-center gap-4 mt-12 pt-8 border-t border-[#E8DEC4]">
                   <button
                     disabled={!pagination.hasPrevPage}
                     onClick={() => updateFilter('page', (currentPage - 1).toString())}
-                    className="p-2 border border-[#E8DEC4] rounded text-charcoal disabled:opacity-30 hover:bg-sand-100"
+                    className="p-2.5 border border-[#E8DEC4] rounded-lg text-charcoal disabled:opacity-30 hover:bg-[#1A1A1A] hover:text-white transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+                    title="Previous Page"
                   >
                     <ChevronLeft className="w-4 h-4" />
+                    <span>Prev</span>
                   </button>
 
-                  <span className="text-xs uppercase tracking-widest font-semibold text-charcoal px-4">
+                  <span className="text-xs uppercase tracking-widest font-semibold text-charcoal px-4 py-2.5 bg-[#FAF8F5] rounded-lg border border-[#E8DEC4]">
                     Page {pagination.page} of {pagination.totalPages}
                   </span>
 
                   <button
                     disabled={!pagination.hasNextPage}
                     onClick={() => updateFilter('page', (currentPage + 1).toString())}
-                    className="p-2 border border-[#E8DEC4] rounded text-charcoal disabled:opacity-30 hover:bg-sand-100"
+                    className="p-2.5 border border-[#E8DEC4] rounded-lg text-charcoal disabled:opacity-30 hover:bg-[#1A1A1A] hover:text-white transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+                    title="Next Page"
                   >
+                    <span>Next</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

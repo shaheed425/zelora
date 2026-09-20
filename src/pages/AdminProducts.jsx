@@ -4,11 +4,67 @@ import AdminLayout from '../components/AdminLayout';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/productService';
 import { fetchCategories } from '../services/categoryService';
 
+const ALL_COLOR_SUGGESTIONS = [
+  { name: 'Natural Teak', hex: '#C5A880' },
+  { name: 'Walnut Brown', hex: '#5C4033' },
+  { name: 'Honey Oak', hex: '#D4A373' },
+  { name: 'Ebony Black', hex: '#1F1F1F' },
+  { name: 'Cream Beige', hex: '#E3DAC9' },
+  { name: 'Slate Grey', hex: '#708090' },
+  { name: 'Royal Blue', hex: '#1B365D' },
+  { name: 'Emerald Green', hex: '#0A5C36' },
+  { name: 'Rosewood Red', hex: '#65000B' },
+  { name: 'Matte White', hex: '#FFFFFF' },
+  { name: 'Charcoal Grey', hex: '#333333' },
+  { name: 'Mahogany Wood', hex: '#4A2511' },
+  { name: 'Golden Brass', hex: '#D4AF37' },
+  { name: 'Terracotta Orange', hex: '#E2725B' },
+  { name: 'Olive Green', hex: '#556B2F' },
+  { name: 'Dusty Pink', hex: '#DCAE96' },
+  { name: 'Mustard Yellow', hex: '#FFDB58' },
+  { name: 'Navy Blue', hex: '#000080' },
+  { name: 'Wine Red', hex: '#722F37' },
+  { name: 'Pearl White', hex: '#F0EAD6' },
+  { name: 'Golden Teak', hex: '#D49B4B' },
+  { name: 'Dark Ash Wood', hex: '#403833' },
+  { name: 'Cognac Leather', hex: '#9E4624' },
+  { name: 'Sage Green', hex: '#87A96B' },
+];
+
+export const getColorHex = (colorName) => {
+  if (!colorName) return '#C5A880';
+  const nameLower = colorName.trim().toLowerCase();
+
+  const matched = ALL_COLOR_SUGGESTIONS.find((c) => c.name.toLowerCase() === nameLower);
+  if (matched) return matched.hex;
+
+  if (nameLower.includes('navy')) return '#000080';
+  if (nameLower.includes('royal blue')) return '#1B365D';
+  if (nameLower.includes('blue')) return '#2563EB';
+  if (nameLower.includes('emerald') || nameLower.includes('dark green')) return '#0A5C36';
+  if (nameLower.includes('green') || nameLower.includes('olive') || nameLower.includes('sage')) return '#556B2F';
+  if (nameLower.includes('wine') || nameLower.includes('maroon') || nameLower.includes('burgundy')) return '#722F37';
+  if (nameLower.includes('red') || nameLower.includes('rosewood')) return '#65000B';
+  if (nameLower.includes('black') || nameLower.includes('ebony') || nameLower.includes('dark')) return '#1F1F1F';
+  if (nameLower.includes('white') || nameLower.includes('cream') || nameLower.includes('ivory')) return '#F5F5DC';
+  if (nameLower.includes('grey') || nameLower.includes('gray') || nameLower.includes('slate')) return '#708090';
+  if (nameLower.includes('teak') || nameLower.includes('beige')) return '#C5A880';
+  if (nameLower.includes('walnut') || nameLower.includes('brown') || nameLower.includes('wood')) return '#5C4033';
+  if (nameLower.includes('oak')) return '#D4A373';
+  if (nameLower.includes('yellow') || nameLower.includes('gold') || nameLower.includes('brass')) return '#D4AF37';
+  if (nameLower.includes('orange') || nameLower.includes('terracotta')) return '#E2725B';
+  if (nameLower.includes('pink')) return '#DCAE96';
+
+  return '#5C4033';
+};
+
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [customColorInput, setCustomColorInput] = useState('');
   
   // Modal state
   const [editingProduct, setEditingProduct] = useState(null);
@@ -24,11 +80,39 @@ const AdminProducts = () => {
     width: '',
     depth: '',
     dimensions: '',
+    colors: ['Natural Teak', 'Walnut Brown'],
+    colorVariants: [],
     stockStatus: 'in-stock',
     isFeatured: false,
     isTrending: false,
     isNewArrival: false,
   });
+
+  const updateColorVariantImage = (colorName, imageUrl) => {
+    setFormData((prev) => {
+      const existing = prev.colorVariants || [];
+      const idx = existing.findIndex((v) => v.color === colorName);
+      let updated;
+      if (idx > -1) {
+        updated = [...existing];
+        updated[idx] = { ...updated[idx], image: imageUrl };
+      } else {
+        updated = [...existing, { color: colorName, image: imageUrl }];
+      }
+      return { ...prev, colorVariants: updated };
+    });
+  };
+
+  const handleAddCustomColor = (e) => {
+    e.preventDefault();
+    if (!customColorInput.trim()) return;
+    const trimmed = customColorInput.trim();
+    const existing = formData.colors || [];
+    if (!existing.includes(trimmed)) {
+      setFormData((prev) => ({ ...prev, colors: [...existing, trimmed] }));
+    }
+    setCustomColorInput('');
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -74,6 +158,8 @@ const AdminProducts = () => {
       width: '180 cm',
       depth: '210 cm',
       dimensions: '180 W x 210 D x 110 H cm',
+      colors: ['Natural Teak', 'Walnut Brown', 'Cream Beige'],
+      colorVariants: [],
       stockStatus: 'in-stock',
       isFeatured: false,
       isTrending: false,
@@ -95,6 +181,8 @@ const AdminProducts = () => {
       width: product.width || '',
       depth: product.depth || '',
       dimensions: product.dimensions || '',
+      colors: Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : ['Natural Teak', 'Walnut Brown'],
+      colorVariants: Array.isArray(product.colorVariants) ? product.colorVariants : [],
       stockStatus: product.stockStatus || 'in-stock',
       isFeatured: !!product.isFeatured,
       isTrending: !!product.isTrending,
@@ -342,6 +430,221 @@ const AdminProducts = () => {
                     className="w-full bg-white border border-[#E8DEC4] px-2.5 py-1.5 rounded text-xs focus:outline-none"
                   />
                 </div>
+              </div>
+
+              {/* Product Colors & Finishes Selector (Flipkart / Amazon Style Variant Picker) */}
+              <div className="bg-[#FAF6EE] border border-[#E8DEC4] p-3.5 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="block font-bold uppercase tracking-wider text-[11px] text-[#886633]">
+                    Available Product Colors & Wood Finishes
+                  </span>
+                  <span className="text-[10px] text-[#777]">Select or add finishes available for this product</span>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {[
+                    { name: 'Natural Teak', hex: '#C5A880' },
+                    { name: 'Walnut Brown', hex: '#5C4033' },
+                    { name: 'Honey Oak', hex: '#D4A373' },
+                    { name: 'Ebony Black', hex: '#1F1F1F' },
+                    { name: 'Cream Beige', hex: '#E3DAC9' },
+                    { name: 'Slate Grey', hex: '#708090' },
+                    { name: 'Royal Blue', hex: '#1B365D' },
+                    { name: 'Emerald Green', hex: '#0A5C36' },
+                    { name: 'Rosewood Red', hex: '#65000B' },
+                  ].map((finish) => {
+                    const selectedColors = formData.colors || [];
+                    const isChecked = selectedColors.includes(finish.name);
+                    return (
+                      <button
+                        key={finish.name}
+                        type="button"
+                        onClick={() => {
+                          const updated = isChecked
+                            ? selectedColors.filter((c) => c !== finish.name)
+                            : [...selectedColors, finish.name];
+                          setFormData({ ...formData, colors: updated });
+                        }}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-all cursor-pointer ${
+                          isChecked
+                            ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-sm'
+                            : 'bg-white text-charcoal border-[#E8DEC4] hover:bg-sand-100'
+                        }`}
+                      >
+                        <span className="w-3 h-3 rounded-full border border-white/40 flex-shrink-0" style={{ backgroundColor: finish.hex }}></span>
+                        <span>{finish.name}</span>
+                        {isChecked && <Check className="w-3 h-3 text-sand-300" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Custom Color Input Form with Instant Auto-Suggest Dropdown */}
+                <div className="pt-2 border-t border-[#E8DEC4] relative">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Search / type custom color finish (e.g. Teak, Navy, Oak)..."
+                      value={customColorInput}
+                      onChange={(e) => setCustomColorInput(e.target.value)}
+                      className="flex-1 bg-white border border-[#E8DEC4] px-2.5 py-1.5 rounded text-xs focus:outline-none focus:border-[#1A1A1A]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomColor}
+                      className="px-3 py-1.5 bg-[#1A1A1A] text-white rounded text-xs font-semibold hover:bg-sand-600 transition-colors cursor-pointer"
+                    >
+                      + Add Finish
+                    </button>
+                  </div>
+
+                  {/* Instant Auto-Suggest Dropdown */}
+                  {customColorInput.trim().length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#E8DEC4] rounded-lg shadow-xl z-30 max-h-48 overflow-y-auto p-1.5 space-y-1">
+                      {ALL_COLOR_SUGGESTIONS.filter(
+                        (c) =>
+                          c.name.toLowerCase().includes(customColorInput.trim().toLowerCase()) &&
+                          !(formData.colors || []).includes(c.name)
+                      ).length === 0 ? (
+                        <div
+                          onClick={handleAddCustomColor}
+                          className="p-2 text-xs text-[#666] hover:bg-sand-100 rounded cursor-pointer flex items-center justify-between"
+                        >
+                          <span>Add custom finish: <strong>"{customColorInput}"</strong></span>
+                          <span className="text-[10px] font-bold text-sand-700 bg-sand-200 px-2 py-0.5 rounded">+ Add</span>
+                        </div>
+                      ) : (
+                        ALL_COLOR_SUGGESTIONS.filter(
+                          (c) =>
+                            c.name.toLowerCase().includes(customColorInput.trim().toLowerCase()) &&
+                            !(formData.colors || []).includes(c.name)
+                        ).map((sug) => (
+                          <button
+                            key={sug.name}
+                            type="button"
+                            onClick={() => {
+                              const existing = formData.colors || [];
+                              if (!existing.includes(sug.name)) {
+                                setFormData((prev) => ({ ...prev, colors: [...existing, sug.name] }));
+                              }
+                              setCustomColorInput('');
+                            }}
+                            className="w-full flex items-center justify-between p-2 hover:bg-[#1A1A1A] hover:text-white rounded text-xs transition-colors cursor-pointer group text-left"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="w-3.5 h-3.5 rounded-full border border-black/20 group-hover:border-white/40 flex-shrink-0"
+                                style={{ backgroundColor: sug.hex }}
+                              />
+                              <span className="font-medium">{sug.name}</span>
+                            </div>
+                            <span className="text-[10px] uppercase font-bold text-sand-600 group-hover:text-sand-300">
+                              + Select
+                            </span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Show Selected Colors Summary Badges */}
+                {formData.colors && formData.colors.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <span className="text-[10px] font-bold uppercase text-[#886633]">Selected ({formData.colors.length}):</span>
+                    {formData.colors.map((col) => (
+                      <span key={col} className="inline-flex items-center gap-1 bg-[#1A1A1A] text-white text-[10px] px-2 py-0.5 rounded font-medium">
+                        {col}
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, colors: formData.colors.filter((c) => c !== col) })}
+                          className="hover:text-red-300 font-bold ml-0.5"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Per-Color Specific Image Upload Cards (Flipkart / Amazon Style Color Image Mapping) */}
+                {formData.colors && formData.colors.length > 0 && (
+                  <div className="pt-3 border-t border-[#E8DEC4] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="block font-bold uppercase tracking-wider text-[11px] text-[#886633]">
+                        Upload Specific Photo for Each Color Finish
+                      </span>
+                      <span className="text-[10px] text-[#777]">Assign individual photos per color finish</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {formData.colors.map((colorName) => {
+                        const variantObj = (formData.colorVariants || []).find((v) => v.color === colorName) || { color: colorName, image: '' };
+                        const hex = getColorHex(colorName);
+
+                        const handleVariantImgUpload = (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              updateColorVariantImage(colorName, reader.result);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        };
+
+                        return (
+                          <div key={colorName} className="bg-white border border-[#E8DEC4] p-2.5 rounded-lg space-y-2 text-xs shadow-sm">
+                            <div className="flex items-center justify-between border-b border-[#F2ECE4] pb-1.5">
+                              <div className="flex items-center gap-1.5 font-bold text-charcoal">
+                                <span className="w-3.5 h-3.5 rounded-full border border-black/20 flex-shrink-0" style={{ backgroundColor: hex }}></span>
+                                <span>{colorName}</span>
+                              </div>
+                              {variantObj.image ? (
+                                <span className="text-[9px] uppercase font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                  Image Uploaded ✓
+                                </span>
+                              ) : (
+                                <span className="text-[9px] uppercase font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                                  Default Main Image
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <div>
+                                <label className="block text-[9px] text-[#777] mb-0.5 font-medium">Option A: Upload Image File</label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleVariantImgUpload}
+                                  className="w-full text-[10px] text-[#666] file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#1A1A1A] file:text-white hover:file:bg-sand-600 cursor-pointer"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] text-[#777] mb-0.5 font-medium">Option B: Paste Image URL</label>
+                                <input
+                                  type="text"
+                                  placeholder={`Paste ${colorName} image URL...`}
+                                  value={variantObj.image || ''}
+                                  onChange={(e) => updateColorVariantImage(colorName, e.target.value)}
+                                  className="w-full bg-[#FAF8F5] border border-[#E8DEC4] px-2 py-1 rounded text-[11px] focus:outline-none"
+                                />
+                              </div>
+                            </div>
+
+                            {variantObj.image && (
+                              <div className="flex items-center gap-2 pt-1 border-t border-[#F2ECE4]">
+                                <span className="text-[9px] uppercase text-[#777] font-semibold">Color Preview:</span>
+                                <img src={variantObj.image} alt={colorName} className="w-10 h-10 object-cover rounded border border-[#E8DEC4] bg-sand-50" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Product Image (File Picker + URL Paste + Instant Preview) */}

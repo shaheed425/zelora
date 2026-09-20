@@ -367,12 +367,12 @@ const Categories = () => {
         </div>
 
         {/* 6 Cards Grid (2 rows of 3 columns, dynamically filtered) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-6">
           {filteredDivisions.map((division) => (
             <Link
               key={division.id}
               to={`/category/${division.slug}`}
-              className="group relative h-[320px] sm:h-[340px] rounded-xl overflow-hidden bg-charcoal shadow-md border border-[#E5DEC9] hover:shadow-2xl transition-all duration-500"
+              className="group relative h-[220px] sm:h-[280px] md:h-[320px] rounded-xl overflow-hidden bg-charcoal shadow-md border border-[#E5DEC9] hover:shadow-2xl transition-all duration-500"
             >
               <img
                 src={division.image}

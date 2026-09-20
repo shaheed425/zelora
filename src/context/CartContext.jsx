@@ -18,16 +18,19 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('zelora_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (product, quantity = 1, selectedColor = null) => {
     setCart((prev) => {
-      const existingIndex = prev.findIndex((item) => item._id === product._id);
+      const colorToUse = selectedColor || (Array.isArray(product.colors) && product.colors[0]) || '';
+      const existingIndex = prev.findIndex(
+        (item) => item._id === product._id && item.selectedColor === colorToUse
+      );
       if (existingIndex > -1) {
         const updated = [...prev];
         updated[existingIndex].quantity += quantity;
         return updated;
       } else {
         const price = product.salePrice > 0 ? product.salePrice : product.price;
-        return [...prev, { ...product, price, quantity }];
+        return [...prev, { ...product, price, quantity, selectedColor: colorToUse }];
       }
     });
     setIsCartOpen(true);

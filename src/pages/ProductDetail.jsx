@@ -2,16 +2,43 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Heart, ShoppingBag, MessageSquare, ShieldCheck, Truck, Wrench, Check, ArrowRight } from 'lucide-react';
 import { fetchProductBySlug, fetchProducts } from '../services/productService';
+import { getColorHex } from './AdminProducts';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import EnquiryModal from '../components/EnquiryModal';
 import ProductCard from '../components/ProductCard';
+import { WhatsAppIcon } from '../components/WhatsAppFloat';
+
+const COLOR_HEX_MAP = {
+  'Natural Teak': '#C5A880',
+  'Walnut Brown': '#5C4033',
+  'Honey Oak': '#D4A373',
+  'Ebony Black': '#1F1F1F',
+  'Cream Beige': '#E3DAC9',
+  'Slate Grey': '#708090',
+  'Royal Blue': '#1B365D',
+  'Emerald Green': '#0A5C36',
+  'Rosewood Red': '#65000B',
+};
+
+const COLOR_FILTER_MAP = {
+  'Natural Teak': { filter: 'sepia(0.2) saturate(1.1)', overlay: 'rgba(197, 168, 128, 0.12)' },
+  'Walnut Brown': { filter: 'sepia(0.55) saturate(0.9) brightness(0.82) contrast(1.08)', overlay: 'rgba(92, 64, 51, 0.22)' },
+  'Honey Oak': { filter: 'sepia(0.35) saturate(1.3) brightness(1.04)', overlay: 'rgba(212, 163, 115, 0.16)' },
+  'Ebony Black': { filter: 'grayscale(0.85) brightness(0.68) contrast(1.2)', overlay: 'rgba(31, 31, 31, 0.32)' },
+  'Cream Beige': { filter: 'brightness(1.08) sepia(0.12) contrast(0.96)', overlay: 'rgba(227, 218, 201, 0.2)' },
+  'Slate Grey': { filter: 'grayscale(0.7) brightness(0.9) contrast(1.05)', overlay: 'rgba(112, 128, 144, 0.2)' },
+  'Royal Blue': { filter: 'hue-rotate(180deg) saturate(1.2) brightness(0.9)', overlay: 'rgba(27, 54, 93, 0.22)' },
+  'Emerald Green': { filter: 'hue-rotate(90deg) saturate(1.1) brightness(0.9)', overlay: 'rgba(10, 92, 54, 0.22)' },
+  'Rosewood Red': { filter: 'hue-rotate(320deg) sepia(0.4) saturate(1.3) brightness(0.85)', overlay: 'rgba(101, 0, 11, 0.22)' },
+};
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [activeImage, setActiveImage] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
@@ -29,6 +56,9 @@ const ProductDetail = () => {
 
         const mainImg = prodData?.featuredImage || prodData?.images?.[0]?.url || '';
         setActiveImage(mainImg);
+        if (prodData?.colors && prodData.colors.length > 0) {
+          setSelectedColor(prodData.colors[0]);
+        }
 
         // Fetch related products in same category
         if (prodData?.category) {
@@ -42,6 +72,7 @@ const ProductDetail = () => {
       }
     };
     loadProduct();
+    window.scrollTo(0, 0);
   }, [slug]);
 
   if (loading) {
@@ -82,6 +113,31 @@ const ProductDetail = () => {
   const originalPrice = product.salePrice > 0 ? product.price : null;
   const galleryImages = product.images && product.images.length > 0 ? product.images : [{ url: activeImage }];
 
+  const availableColors = Array.isArray(product.colors) && product.colors.length > 0
+    ? product.colors
+    : ['Natural Teak', 'Walnut Brown', 'Cream Beige'];
+
+  const activeSelectedColor = selectedColor || availableColors[0];
+  const activeColorStyle = COLOR_FILTER_MAP[activeSelectedColor] || null;
+  const activeHex = getColorHex(activeSelectedColor);
+
+  const handleColorSelect = (colorName, colorIdx) => {
+    setSelectedColor(colorName);
+    // 1. Check if Admin uploaded a specific photo for this color finish
+    const matchedVariant = Array.isArray(product.colorVariants)
+      ? product.colorVariants.find((v) => v.color?.toLowerCase() === colorName?.toLowerCase() && v.image)
+      : null;
+
+    if (matchedVariant?.image) {
+      setActiveImage(matchedVariant.image);
+    } else if (galleryImages.length > 0) {
+      const targetImg = galleryImages[colorIdx % galleryImages.length];
+      if (targetImg?.url) {
+        setActiveImage(targetImg.url);
+      }
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
       {/* Breadcrumb Navigation */}
@@ -100,15 +156,30 @@ const ProductDetail = () => {
         
         {/* LEFT: Image Gallery (7 Columns) */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="aspect-square bg-[#FAF8F5] rounded-xl overflow-hidden border border-[#F2ECE4] relative shadow-md">
+          <div className="aspect-square bg-[#FAF8F5] rounded-xl overflow-hidden border border-[#F2ECE4] relative shadow-md group">
             <img
               src={activeImage || 'https://mediumturquoise-hedgehog-393181.hostingersite.com/public/images/product/2025-06-10-1749562225-AFRA.jpg'}
               alt={product.name}
-              className="w-full h-full object-cover object-center transition-all duration-500"
+              style={{ filter: activeColorStyle?.filter || 'none' }}
+              className="w-full h-full object-cover object-center transition-all duration-700 ease-out"
               onError={(e) => {
                 e.target.src = 'https://mediumturquoise-hedgehog-393181.hostingersite.com/public/images/product/2025-06-10-1749562225-AFRA.jpg';
               }}
             />
+
+            {/* Dynamic Color Tone Overlay */}
+            {activeColorStyle?.overlay && (
+              <div
+                className="absolute inset-0 pointer-events-none transition-all duration-500"
+                style={{ backgroundColor: activeColorStyle.overlay, mixBlendMode: 'multiply' }}
+              />
+            )}
+
+            {/* Floating Active Finish Badge */}
+            <div className="absolute bottom-4 left-4 bg-black/75 backdrop-blur-md text-white text-[10px] uppercase font-semibold px-3 py-1.5 rounded-lg flex items-center gap-2 z-10 shadow-lg border border-white/10">
+              <span className="w-2.5 h-2.5 rounded-full border border-white/50 flex-shrink-0" style={{ backgroundColor: activeHex }} />
+              <span>Previewing {activeSelectedColor} Finish</span>
+            </div>
 
             <button
               onClick={() => toggleWishlist(product)}
@@ -167,6 +238,43 @@ const ProductDetail = () => {
             )}
           </div>
 
+          {/* Flipkart / Amazon Style Interactive Color Finish Swatches */}
+          <div className="space-y-2 py-3 border-b border-[#E8DEC4]">
+            <div className="flex items-center justify-between text-xs">
+              <span className="uppercase tracking-wider font-semibold text-charcoal">
+                Finish / Color Option: <span className="text-sand-700 font-bold ml-1">{activeSelectedColor}</span>
+              </span>
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                {availableColors.length} Finishes Available
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {availableColors.map((colorName, colorIdx) => {
+                const hex = getColorHex(colorName);
+                const isSelected = activeSelectedColor === colorName;
+                return (
+                  <button
+                    key={colorName}
+                    onClick={() => handleColorSelect(colorName, colorIdx)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white shadow-md scale-105'
+                        : 'border-[#E8DEC4] bg-[#FAF8F5] text-charcoal hover:border-sand-400 hover:bg-sand-100'
+                    }`}
+                  >
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-white/40 shadow-inner flex-shrink-0"
+                      style={{ backgroundColor: hex }}
+                    ></span>
+                    <span>{colorName}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-sand-300 ml-0.5" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Description */}
           <p className="text-xs text-[#555555] leading-relaxed font-light">
             {product.description || product.shortDescription}
@@ -218,20 +326,30 @@ const ProductDetail = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <button
-                onClick={() => addToCart(product, quantity)}
-                className="btn-editorial bg-[#1A1A1A] text-white hover:bg-sand-600 rounded flex items-center justify-center gap-2 py-4"
+                onClick={() => addToCart(product, quantity, activeSelectedColor)}
+                className="btn-editorial bg-[#1A1A1A] text-white hover:bg-sand-600 rounded flex items-center justify-center gap-2 py-4 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Add to Cart</span>
+                <span>Add to Cart ({activeSelectedColor})</span>
               </button>
 
               <button
                 onClick={() => setIsEnquiryOpen(true)}
-                className="btn-editorial bg-[#FAF8F5] border border-sand-600 text-sand-800 hover:bg-sand-100 rounded flex items-center justify-center gap-2 py-4"
+                className="btn-editorial bg-[#FAF8F5] border border-sand-600 text-sand-800 hover:bg-sand-100 rounded flex items-center justify-center gap-2 py-4 cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Enquire / Custom</span>
               </button>
+
+              <a
+                href={`https://wa.me/918137055827?text=${encodeURIComponent(`Hi ZELORA, I am interested in inquiring about "${product.name}" in ${activeSelectedColor} finish (Price: ${formatCurrency(displayPrice)}). Product SKU: ${product.sku || product._id}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sm:col-span-2 bg-[#25D366] hover:bg-[#20ba5a] text-black font-bold rounded-lg flex items-center justify-center gap-2.5 py-3.5 px-4 shadow-md hover:shadow-lg transition-all duration-300 text-xs uppercase tracking-wider whitespace-nowrap"
+              >
+                <WhatsAppIcon className="w-5 h-5 text-black flex-shrink-0" />
+                <span>Direct WhatsApp Consultation</span>
+              </a>
             </div>
           </div>
 
@@ -267,7 +385,7 @@ const ProductDetail = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {relatedProducts.map((relProd) => (
               <ProductCard key={relProd._id} product={relProd} />
             ))}

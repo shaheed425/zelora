@@ -1,106 +1,218 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, ShieldCheck, ChevronRight } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppFloat';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#111111] text-[#FAF8F5] pt-20 pb-12 border-t border-[#2D2D2D] mt-24">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 pb-16 border-b border-[#2D2D2D]">
+    <footer className="bg-[#0D0D0D] text-[#FAF8F5] pt-10 pb-8 border-t border-[#262626] mt-12">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
         
-        {/* Brand Column */}
-        <div className="lg:col-span-2 pr-6">
-          <Link to="/" className="inline-block mb-6">
-            <span className="font-editorial text-4xl tracking-tight font-bold text-white">
-              ZELORA
-            </span>
-            <span className="block text-[9px] font-sans tracking-mega uppercase text-sand-500 font-semibold mt-1">
-              Luxury Furniture Showroom
-            </span>
-          </Link>
-          <p className="text-sm text-[#A0A0A0] leading-relaxed max-w-sm mb-8 font-light">
-            Architecturally conceived furniture crafted with durable teak, premium upholstery, and timeless Scandinavian-Indian aesthetics. Built to belong in your home.
-          </p>
-
-          <div className="space-y-3 text-xs text-[#CCCCCC]">
-            <div className="flex items-center gap-3">
-              <MapPin className="w-4 h-4 text-sand-500 flex-shrink-0" />
-              <span>Calicut, Kerala, India</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-sand-500 flex-shrink-0" />
-              <span>+91 9744080502 / +91 8086018820</span>
-            </div>
+        {/* Top Section: Brand & Description & Socials */}
+        <div className="mb-8 border-b border-[#262626] pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <Link to="/" className="inline-block mb-2">
+              <span className="font-editorial text-2xl sm:text-3xl tracking-tight font-bold text-white">
+                ZELORA
+              </span>
+              <span className="block text-[8px] font-sans tracking-mega uppercase text-sand-500 font-semibold mt-0.5">
+                Luxury Furniture Showroom
+              </span>
+            </Link>
+            <p className="text-xs text-[#B0B0B0] leading-relaxed max-w-lg font-light">
+              Crafting timeless luxury furniture with solid teak wood & modern Scandinavian aesthetics.
+            </p>
           </div>
-        </div>
 
-        {/* Quick Collections */}
-        <div>
-          <h4 className="font-editorial text-xl font-medium tracking-wide mb-6 text-white border-b border-sand-500/30 pb-2 inline-block">
-            Collections
-          </h4>
-          <ul className="space-y-3 text-xs text-[#A0A0A0] uppercase tracking-wider font-medium">
-            <li><Link to="/category/sofas" className="hover:text-sand-400 transition-colors">Living & Sofas</Link></li>
-            <li><Link to="/category/bedroom-sets" className="hover:text-sand-400 transition-colors">Bedroom Suite</Link></li>
-            <li><Link to="/category/dining-sets" className="hover:text-sand-400 transition-colors">Dining & Tables</Link></li>
-            <li><Link to="/category/wardrobes" className="hover:text-sand-400 transition-colors">Wardrobes & Storage</Link></li>
-            <li><Link to="/category/office-tables" className="hover:text-sand-400 transition-colors">Executive Workspace</Link></li>
-            <li><Link to="/new-arrivals" className="hover:text-sand-400 transition-colors">New Season</Link></li>
-          </ul>
-        </div>
-
-        {/* Company & Support */}
-        <div>
-          <h4 className="font-editorial text-xl font-medium tracking-wide mb-6 text-white border-b border-sand-500/30 pb-2 inline-block">
-            Navigation
-          </h4>
-          <ul className="space-y-3 text-xs text-[#A0A0A0] uppercase tracking-wider font-medium">
-            <li><Link to="/about" className="hover:text-sand-400 transition-colors">About ZELORA</Link></li>
-            <li><Link to="/store-locations" className="hover:text-sand-400 transition-colors">Store Locations</Link></li>
-            <li><Link to="/contact" className="hover:text-sand-400 transition-colors">Wholesale Enquiry</Link></li>
-            <li><Link to="/blog" className="hover:text-sand-400 transition-colors">Editorial Journal</Link></li>
-            <li><Link to="/faqs" className="hover:text-sand-400 transition-colors">FAQs & Care</Link></li>
-            <li><Link to="/admin" className="hover:text-sand-400 transition-colors">Business Portal</Link></li>
-          </ul>
-        </div>
-
-        {/* Newsletter & Guarantee */}
-        <div>
-          <h4 className="font-editorial text-xl font-medium tracking-wide mb-6 text-white border-b border-sand-500/30 pb-2 inline-block">
-            Newsletter
-          </h4>
-          <p className="text-xs text-[#A0A0A0] leading-relaxed mb-4">
-            Receive exclusive previews of seasonal luxury releases and interior design edits.
-          </p>
-          <form onSubmit={(e) => e.preventDefault()} className="relative mb-6">
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="w-full bg-[#1A1A1A] border border-[#333] text-xs text-white px-4 py-3 pr-10 rounded focus:outline-none focus:border-sand-500 transition-colors placeholder-[#666]"
-            />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-sand-500 hover:text-white transition-colors"
+          {/* Social Icon Boxes */}
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 rounded-lg border border-white/20 bg-[#161616] text-white/80 hover:text-white hover:border-sand-400 hover:bg-[#222] transition-all flex items-center justify-center shadow-sm"
+              title="Instagram"
             >
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </form>
-
-          <div className="flex items-center gap-2 text-xs text-sand-400">
-            <ShieldCheck className="w-4 h-4 flex-shrink-0" />
-            <span>5-Year Manufacturer Warranty Included</span>
+              <Instagram className="w-4 h-4" />
+            </a>
+            <a
+              href="https://facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 rounded-lg border border-white/20 bg-[#161616] text-white/80 hover:text-white hover:border-sand-400 hover:bg-[#222] transition-all flex items-center justify-center shadow-sm"
+              title="Facebook"
+            >
+              <Facebook className="w-4 h-4" />
+            </a>
+            <a
+              href="https://wa.me/918137055827"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 rounded-lg border border-[#25D366]/40 bg-[#161616] text-[#25D366] hover:bg-[#25D366] hover:text-black transition-all flex items-center justify-center shadow-sm"
+              title="WhatsApp"
+            >
+              <WhatsAppIcon className="w-4 h-4" />
+            </a>
           </div>
         </div>
 
-      </div>
+        {/* Links Grid Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          
+          {/* Column 1: QUICK LINKS */}
+          <div>
+            <h4 className="text-[11px] uppercase tracking-widest font-bold text-white mb-3 pb-1 border-b border-[#333] inline-block">
+              QUICK LINKS
+            </h4>
+            <ul className="space-y-2 text-xs text-[#B0B0B0]">
+              <li>
+                <Link to="/" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Home</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Shop Catalog</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>About Us</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/categories" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Categories</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Contact Us</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+            </ul>
+          </div>
 
-      {/* Bottom Bar */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-[#666666]">
-        <p>© 2026 ZELORA Studio. All rights reserved. Inspired by Kerala craftsmanship.</p>
-        <div className="flex items-center gap-6 mt-4 md:mt-0">
-          <Link to="/contact" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <Link to="/contact" className="hover:text-white transition-colors">Terms of Service</Link>
-          <Link to="/contact" className="hover:text-white transition-colors">Warranty Statement</Link>
+          {/* Column 2: COLLECTIONS */}
+          <div>
+            <h4 className="text-[11px] uppercase tracking-widest font-bold text-white mb-3 pb-1 border-b border-[#333] inline-block">
+              COLLECTIONS
+            </h4>
+            <ul className="space-y-2 text-xs text-[#B0B0B0]">
+              <li>
+                <Link to="/category/sofas" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Living & Sofas</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/category/bedroom-sets" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Bedroom Suite</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/category/dining-sets" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Dining Sets</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/category/wardrobes" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Wardrobes & Storage</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: CUSTOMER SUPPORT */}
+          <div>
+            <h4 className="text-[11px] uppercase tracking-widest font-bold text-white mb-3 pb-1 border-b border-[#333] inline-block">
+              CUSTOMER SUPPORT
+            </h4>
+            <ul className="space-y-2 text-xs text-[#B0B0B0]">
+              <li>
+                <Link to="/store-locations" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Store Locations</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/faqs" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>FAQs & Care</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/blog" className="flex items-center justify-between hover:text-sand-300 transition-colors group pr-2">
+                  <span>Editorial Journal</span>
+                  <ChevronRight className="w-3 h-3 text-white/30 group-hover:text-sand-300 transition-colors" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: GUARANTEE */}
+          <div>
+            <h4 className="text-[11px] uppercase tracking-widest font-bold text-white mb-3 pb-1 border-b border-[#333] inline-block">
+              EXCELLENCE
+            </h4>
+            <p className="text-xs text-[#B0B0B0] leading-relaxed mb-3 font-light">
+              5-Year Warranty on teak wood frames & upholstery.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-sand-400 font-semibold bg-[#161616] p-2.5 rounded-lg border border-white/10">
+              <ShieldCheck className="w-4 h-4 text-sand-300 flex-shrink-0" />
+              <span>Certified Warranty</span>
+            </div>
+          </div>
+
         </div>
+
+        {/* Featured Showroom Location Card Box */}
+        <div className="bg-[#161616] border border-[#2A2A2A] rounded-xl p-4 sm:p-5 mb-8 shadow-md">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-sand-300 flex-shrink-0">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-widest font-bold text-white/60 block">
+                  SHOWROOM LOCATION
+                </span>
+                <h3 className="font-editorial text-lg sm:text-xl font-light text-white leading-tight">
+                  ZELORA Furniture Showroom, Kannur & Calicut
+                </h3>
+              </div>
+            </div>
+
+            <a
+              href="https://wa.me/918137055827?text=Hi%20ZELORA,%20I%20would%20like%20to%20visit%20the%20showroom."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-black font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-lg transition-all shadow-md whitespace-nowrap"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5 text-black" />
+              <span>Book Visit</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="pt-4 border-t border-[#262626] flex flex-col md:flex-row items-center justify-between text-[11px] text-[#777777]">
+          <p className="text-center md:text-left">© 2026 ZELORA Studio. All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-4 mt-2 md:mt-0">
+            <Link to="/contact" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/contact" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link to="/contact" className="hover:text-white transition-colors">Warranty Statement</Link>
+          </div>
+        </div>
+
       </div>
     </footer>
   );

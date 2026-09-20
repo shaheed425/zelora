@@ -68,6 +68,11 @@ const CartDrawer = () => {
                     <h5 className="font-editorial text-lg font-medium text-charcoal line-clamp-1">
                       {item.name}
                     </h5>
+                    {item.selectedColor && (
+                      <p className="text-[11px] text-[#76726E] font-medium mt-0.5">
+                        Finish: <span className="text-charcoal font-semibold">{item.selectedColor}</span>
+                      </p>
+                    )}
                     <p className="text-xs text-sand-600 font-semibold mt-0.5">
                       {formatCurrency(item.price)}
                     </p>

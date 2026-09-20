@@ -73,7 +73,12 @@ const Cart = () => {
                       {item.name}
                     </h4>
                   </Link>
-                  <p className="text-xs text-[#76726E] mt-1 font-mono">SKU: {item.sku || 'N/A'}</p>
+                  {item.selectedColor && (
+                    <p className="text-xs text-[#76726E] mt-0.5">
+                      Finish: <span className="text-charcoal font-semibold">{item.selectedColor}</span>
+                    </p>
+                  )}
+                  <p className="text-xs text-[#76726E] mt-0.5 font-mono">SKU: {item.sku || 'N/A'}</p>
                 </div>
               </div>
 

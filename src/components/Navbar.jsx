@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
+import { fetchProducts } from '../services/productService';
 import Logo from './Logo';
 
 const Navbar = () => {
@@ -45,7 +46,7 @@ const Navbar = () => {
     }
   }, [isSearchOpen]);
 
-  // Live Instant Search API Call
+  // Live Instant Search API Call (Instant response upon single letter typing)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -56,14 +57,14 @@ const Navbar = () => {
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const res = await API.get(`/products?search=${encodeURIComponent(searchQuery)}&limit=6`);
-        setSearchResults(res.data?.products || res.data?.data || []);
+        const res = await fetchProducts({ search: searchQuery.trim(), limit: 6 });
+        setSearchResults(res.products || []);
       } catch (err) {
         console.error('Search error:', err);
       } finally {
         setIsLoading(false);
       }
-    }, 300);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -272,9 +273,10 @@ const Navbar = () => {
               {/* Live Search Results Dropdown */}
               {searchResults.length > 0 && (
                 <div className="space-y-2 max-h-[380px] overflow-y-auto custom-scrollbar pt-3 mt-2 border-t border-white/10">
-                  <p className="text-[9px] uppercase tracking-widest text-white/50 font-mono mb-1.5">
-                    {searchResults.length} PIECES FOUND
-                  </p>
+                  <div className="flex items-center justify-between text-[9px] uppercase tracking-widest text-white/50 font-mono mb-1.5 px-1">
+                    <span>SUGGESTED PIECES ({searchResults.length})</span>
+                    <span>INSTANT SEARCH</span>
+                  </div>
                   {searchResults.map((product) => {
                     const imgUrl =
                       product.featuredImage ||
@@ -291,7 +293,7 @@ const Navbar = () => {
                         }}
                         className="flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white/10 cursor-pointer transition-colors group"
                       >
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-charcoal flex-shrink-0 border border-white/15 shadow-md">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-charcoal flex-shrink-0 border border-white/15 shadow-md">
                           <img
                             src={imgUrl}
                             alt={product.name}
@@ -318,6 +320,17 @@ const Navbar = () => {
                       </div>
                     );
                   })}
+
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                    }}
+                    className="w-full text-center py-2.5 mt-2 bg-white/10 hover:bg-[#C5A880] hover:text-black rounded-xl text-xs uppercase font-semibold tracking-wider transition-colors flex items-center justify-center gap-2"
+                  >
+                    <span>View All Results for "{searchQuery}"</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
