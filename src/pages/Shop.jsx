@@ -61,6 +61,8 @@ const Shop = () => {
   }, [searchParams, currentPage, selectedCategory, selectedSort, minPrice, maxPrice, searchQuery]);
 
   const updateFilter = (key, value) => {
+    // Synchronously scroll to top of page before updating state or parameters
+    window.scrollTo(0, 0);
     const newParams = new URLSearchParams(searchParams);
     if (value) {
       newParams.set(key, value);
@@ -71,12 +73,11 @@ const Shop = () => {
       newParams.set('page', '1');
     }
     setSearchParams(newParams);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const clearAllFilters = () => {
+    window.scrollTo(0, 0);
     setSearchParams(new URLSearchParams());
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -222,7 +223,7 @@ const Shop = () => {
         </div>
 
         {/* Products Grid */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 min-h-[550px]">
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {[...Array(6)].map((_, i) => (
@@ -253,7 +254,10 @@ const Shop = () => {
                 <div className="flex items-center justify-center gap-4 mt-12 pt-8 border-t border-[#E8DEC4]">
                   <button
                     disabled={!pagination.hasPrevPage}
-                    onClick={() => updateFilter('page', (currentPage - 1).toString())}
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                      updateFilter('page', (currentPage - 1).toString());
+                    }}
                     className="p-2.5 border border-[#E8DEC4] rounded-lg text-charcoal disabled:opacity-30 hover:bg-[#1A1A1A] hover:text-white transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
                     title="Previous Page"
                   >
@@ -267,7 +271,10 @@ const Shop = () => {
 
                   <button
                     disabled={!pagination.hasNextPage}
-                    onClick={() => updateFilter('page', (currentPage + 1).toString())}
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                      updateFilter('page', (currentPage + 1).toString());
+                    }}
                     className="p-2.5 border border-[#E8DEC4] rounded-lg text-charcoal disabled:opacity-30 hover:bg-[#1A1A1A] hover:text-white transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
                     title="Next Page"
                   >
