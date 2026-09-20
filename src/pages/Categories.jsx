@@ -29,7 +29,7 @@ const Categories = () => {
       id: 1,
       num: '01',
       title: 'BEDROOM',
-      image: '/images/category_hero_bedroom.png',
+      image: '/images/category_hero_bedroom.webp',
       headline: 'Furniture',
       highlight: 'for Every Space',
       subtitle: 'Explore our complete range of handcrafted furniture, designed for modern Indian homes.',
@@ -38,7 +38,7 @@ const Categories = () => {
       id: 2,
       num: '02',
       title: 'LIVING',
-      image: '/images/image.png',
+      image: '/images/image.webp',
       headline: 'Curated Seating',
       highlight: 'for Modern Living',
       subtitle: 'Premium handcrafted sofas, armchairs, and living room collections for timeless comfort.',
@@ -47,7 +47,7 @@ const Categories = () => {
       id: 3,
       num: '03',
       title: 'DINING',
-      image: '/images/slide2.png',
+      image: '/images/slide2.webp',
       headline: 'Dining Spaces',
       highlight: 'Built for Togetherness',
       subtitle: 'Solid wood dining tables, luxury seating, and entertaining essentials.',
@@ -56,7 +56,7 @@ const Categories = () => {
       id: 4,
       num: '04',
       title: 'OFFICE',
-      image: '/images/slide3.png',
+      image: '/images/slide3.webp',
       headline: 'Ergonomic Workspaces',
       highlight: 'Crafted for Focus',
       subtitle: 'Design-forward study desks, executive office chairs, and functional storage.',
@@ -84,56 +84,56 @@ const Categories = () => {
       id: 'living-room',
       badge: 'LIVING ROOM',
       title: 'Sofas & Seating',
-      image: '/images/image.png',
+      image: '/images/image.webp',
       slug: 'living-room',
     },
     {
       id: 'bedroom',
       badge: 'BEDROOM',
       title: 'Beds & Bedroom Sets',
-      image: '/images/category_hero_bedroom.png',
+      image: '/images/category_hero_bedroom.webp',
       slug: 'bedroom-sets',
     },
     {
       id: 'dining',
       badge: 'DINING',
       title: 'Dining Sets',
-      image: '/images/slide2.png',
+      image: '/images/slide2.webp',
       slug: 'dining-sets',
     },
     {
       id: 'storage',
       badge: 'STORAGE',
       title: 'Wardrobes & Storage',
-      image: '/images/slide3.png',
+      image: '/images/slide3.webp',
       slug: 'storage',
     },
     {
       id: 'workspace',
       badge: 'WORKSPACE',
       title: 'Study & Office',
-      image: '/images/hero_bg.png',
+      image: '/images/hero_bg.webp',
       slug: 'office-furniture',
     },
     {
       id: 'more',
       badge: 'MORE',
       title: 'Additional Collections',
-      image: '/images/slide2.png',
+      image: '/images/slide2.webp',
       slug: 'collections',
     },
   ];
 
   // 3. Small Pill Categories (8 Items)
   const completeRange = [
-    { name: 'Sofas', image: '/images/image.png', slug: 'sofas' },
-    { name: 'Beds', image: '/images/category_hero_bedroom.png', slug: 'beds' },
-    { name: 'Dining Sets', image: '/images/slide2.png', slug: 'dining-sets' },
-    { name: 'Chairs', image: '/images/image.png', slug: 'chairs' },
-    { name: 'Tables', image: '/images/slide3.png', slug: 'tables' },
-    { name: 'Storage', image: '/images/slide3.png', slug: 'storage' },
-    { name: 'Shoe Cabinets', image: '/images/slide2.png', slug: 'shoe-cabinets' },
-    { name: 'TV Units', image: '/images/hero_bg.png', slug: 'tv-units' },
+    { name: 'Sofas', image: '/images/image.webp', slug: 'sofas' },
+    { name: 'Beds', image: '/images/category_hero_bedroom.webp', slug: 'beds' },
+    { name: 'Dining Sets', image: '/images/slide2.webp', slug: 'dining-sets' },
+    { name: 'Chairs', image: '/images/image.webp', slug: 'chairs' },
+    { name: 'Tables', image: '/images/slide3.webp', slug: 'tables' },
+    { name: 'Storage', image: '/images/slide3.webp', slug: 'storage' },
+    { name: 'Shoe Cabinets', image: '/images/slide2.webp', slug: 'shoe-cabinets' },
+    { name: 'TV Units', image: '/images/hero_bg.webp', slug: 'tv-units' },
   ];
 
   // Dynamic Filtering Logic based on activeFilter state
@@ -379,7 +379,7 @@ const Categories = () => {
                 alt={division.title}
                 className="w-full h-full object-cover filter brightness-[1.05] contrast-[1.02] group-hover:scale-105 transition-transform duration-700"
                 onError={(e) => {
-                  e.target.src = '/images/image.png';
+                  e.target.src = '/images/image.webp';
                 }}
               />
 
@@ -441,7 +441,7 @@ const Categories = () => {
                   alt={item.name}
                   className="w-full h-full object-cover filter brightness-[1.05] contrast-[1.02] group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
-                    e.target.src = '/images/image.png';
+                    e.target.src = '/images/image.webp';
                   }}
                 />
               </div>
@@ -462,7 +462,7 @@ const Categories = () => {
           {/* Left 60%: High-res armchair image */}
           <div className="lg:col-span-7 relative min-h-[300px] sm:min-h-[380px]">
             <img
-              src="/images/image.png"
+              src="/images/image.webp"
               alt="Spaces that Inspire Living"
               className="absolute inset-0 w-full h-full object-cover"
               onError={(e) => {

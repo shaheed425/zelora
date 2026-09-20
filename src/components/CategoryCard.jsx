@@ -7,10 +7,10 @@ const CategoryCard = ({ category, index }) => {
 
   // Distinct photorealistic fallback images for each category card
   const categoryFallbacks = [
-    '/images/image.png',                 // 01 LIVING ROOM (Sofas & Seating)
-    '/images/category_hero_bedroom.png', // 02 BEDROOM (Beds & Bedroom Sets)
-    '/images/slide2.png',                // 03 DINING (Dining Sets)
-    '/images/slide3.png',                // 04 STORAGE (Wardrobes & Storage)
+    '/images/image.webp',                 // 01 LIVING ROOM (Sofas & Seating)
+    '/images/category_hero_bedroom.webp', // 02 BEDROOM (Beds & Bedroom Sets)
+    '/images/slide2.webp',                // 03 DINING (Dining Sets)
+    '/images/slide3.webp',                // 04 STORAGE (Wardrobes & Storage)
   ];
 
   const getCategoryImage = () => {

@@ -145,8 +145,8 @@ const Home = () => {
               <img
                 src={
                   [
-                    '/images/category_hero_bedroom.png',
-                    '/images/slide2.png',
+                    '/images/category_hero_bedroom.webp',
+                    '/images/slide2.webp',
                     'https://mediumturquoise-hedgehog-393181.hostingersite.com/public/images/product/2025-06-11-1749616838-ALEXA.jpg',
                   ][activeBedroomIndex || 0]
                 }
@@ -173,8 +173,8 @@ const Home = () => {
               {/* 3 Thumbnail Images */}
               <div className="flex items-center gap-3">
                 {[
-                  '/images/category_hero_bedroom.png',
-                  '/images/slide2.png',
+                  '/images/category_hero_bedroom.webp',
+                  '/images/slide2.webp',
                   'https://mediumturquoise-hedgehog-393181.hostingersite.com/public/images/product/2025-06-11-1749616838-ALEXA.jpg',
                 ].map((img, idx) => (
                   <button

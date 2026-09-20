@@ -6,7 +6,7 @@ const SLIDES = [
   {
     id: 1,
     number: '01',
-    image: '/images/image.png',
+    image: '/images/image.webp',
     tagline: 'MODERN LIVING, TIMELESS CRAFT',
     headingMain: 'Spaces',
     headingSub: 'that feel',
@@ -17,7 +17,7 @@ const SLIDES = [
   {
     id: 2,
     number: '02',
-    image: '/images/slide2.png',
+    image: '/images/slide2.webp',
     tagline: 'BESPOKE BEDROOM SUITE',
     headingMain: 'Sanctuary',
     headingSub: 'sculpted for',
@@ -28,7 +28,7 @@ const SLIDES = [
   {
     id: 3,
     number: '03',
-    image: '/images/slide3.png',
+    image: '/images/slide3.webp',
     tagline: 'CONTEMPORARY DINING',
     headingMain: 'Gathering',
     headingSub: 'around pure',
